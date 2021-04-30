@@ -79,9 +79,11 @@ client = discord.Client()
 random.seed(time.time())
 
 
+stat_strings = "Strength", "Dexterity", "Consitution", "Intelligence", "Wisdom", "Charisma"
+
 pChar = Character("First Last",
-	"Class Name",
-	"Subclass Name",
+	"Class",
+	"Subclass",
 	"Background",
 	"Discord Name",
 	"Sub Race, Race",
@@ -118,15 +120,44 @@ async def SendSheet(message, character):
 
 		#create pdf
 		canvas = Canvas("character.pdf", pagesize=LETTER)
+
+		#Character Name
+		canvas.setFont("Times-Roman", 20)
+		canvas.drawString(0.5 * inch, 10.5 * inch, character.char_name)
+		#Character level, class, background, and player name
+		canvas.drawString(2 * inch, 10.5 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
+		canvas.drawString(4.5 * inch, 10.5 * inch, character.char_background)
+		canvas.drawString(6 * inch, 10.5 * inch, character.player_name)
+		#Character Race, alignment, and experience
+		canvas.drawString(2 * inch, 10 * inch, character.char_race)
+		canvas.drawString(4.5 * inch, 10 * inch, character.char_alignment)
+		canvas.drawString(6 * inch, 10 * inch, str(character.char_exp))
+
+		canvas.setFont("Times-Roman", 10)
+		canvas.drawString(0.5 * inch, 10.3 * inch, "Character Name")
+		#Character level, class, background, and player name
+		canvas.drawString(2 * inch, 10.3 * inch, "Level and Class")
+		canvas.drawString(4.5 * inch, 10.3 * inch, "Background")
+		canvas.drawString(6 * inch, 10.3 * inch, "Player Name")
+		#Character Race, alignment, and experience
+		canvas.drawString(2 * inch, 9.8 * inch, "Race")
+		canvas.drawString(4.5 * inch, 9.8 * inch, "Alignment")
+		canvas.drawString(6 * inch, 9.8 * inch, "Experience")
+
+		#Attribute Names
 		canvas.setFont("Times-Roman", 12)
 		for count in range(0, 6):
-			canvas.drawString(0.5 * inch, (10.75 * inch) - (count * inch), (attributeStrings[count][0]))
+			canvas.drawString(0.3 * inch, (9.75 * inch) - (count * inch), str(stat_strings[count]))
+		#Attribute Values
 		canvas.setFont("Times-Roman", 30)
 		for count in range(0, 6):
-			canvas.drawString(0.5 * inch, (10.25 * inch) - (count * inch), (str(attributes[count])))
-		canvas.setFont("Times-Roman", 20)
+			canvas.drawString(0.5 * inch, (9.25 * inch) - (count * inch), str(character.char_stats[count]))
+		#Attribute modifier
+		canvas.setFont("Times-Roman", 18)
 		for count in range(0, 6):
-			canvas.drawString(0.75 * inch, (10 * inch) - (count * inch), (str((attributes[count] - 10)//2)))
+			canvas.drawString(0.6 * inch, (9 * inch) - (count * inch), (str((character.char_stats[count] - 10)//2)))
+
+
 		#save pdf
 		canvas.save()
 
@@ -161,10 +192,10 @@ async def on_message(message):
 			if message.content.startswith("&" + word):
 				await Roll(message)
 
-		sendPDFText = "pdf", "PDF"
-		for word in sendPDFText:
+		sendCharacterText = "pdf", "PDF", "Sheet", "sheet"
+		for word in sendCharacterText:
 			if message.content.startswith("&" + word):
-				await SendPDF(message)
+				await SendSheet(message, pChar)
 
 
 @client.event
