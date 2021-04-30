@@ -2,11 +2,16 @@
 import discord
 
 #pypdf2
-import PyPDF2 
+import PyPDF2
+from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfFileWriter
 
 #file paths
 import pathlib
+from pathlib import Path
 
+#url paths
+import urllib.request
 
 #reportLab
 import reportlab
@@ -26,6 +31,9 @@ import math
 #time
 import time
 
+
+
+#character object
 import dataclasses
 from dataclasses import dataclass
 from collections import namedtuple
@@ -72,16 +80,25 @@ class Character():
 	char_death_saves = death_saves(0, 0)
 
 
+
 #instantiation
+#discord client
 client = discord.Client()
+#object for writing pdfs
+pdf_writer = PdfFileWriter()
 
 #initializations
+#random seed
 random.seed(time.time())
 
+#getting pdf from path
+input_pdf = PdfFileReader("Character_Sheet_2018.pdf")
 
+#ability scores strings
 stat_strings = "Strength", "Dexterity", "Consitution", "Intelligence", "Wisdom", "Charisma"
 
-pChar = Character("First Last",
+#character basic info
+character = Character("First Last",
 	"Class",
 	"Subclass",
 	"Background",
@@ -100,6 +117,14 @@ pChar = Character("First Last",
 	30,
 	1)
 
+
+
+def download_file(download_url):
+    response = urllib.request.urlopen(download_url)
+    file = open("Document.pdf", 'wb')
+    file.write(response.read())
+    file.close()
+    #print("Completed")
 
 
 #Help Function "help", "Help", "tasukete", "Tasukete", "?"
@@ -122,27 +147,29 @@ async def SendSheet(message, character):
 		canvas = Canvas("character.pdf", pagesize=LETTER)
 
 		#Character Name
-		canvas.setFont("Times-Roman", 20)
-		canvas.drawString(0.5 * inch, 10.5 * inch, character.char_name)
+		canvas.setFont("Times-Roman", 16)
+		canvas.drawString(0.2 * inch, 10.5 * inch, character.char_name)
 		#Character level, class, background, and player name
 		canvas.drawString(2 * inch, 10.5 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
-		canvas.drawString(4.5 * inch, 10.5 * inch, character.char_background)
-		canvas.drawString(6 * inch, 10.5 * inch, character.player_name)
+		canvas.drawString(4.8 * inch, 10.5 * inch, character.char_background)
+		canvas.drawString(6.5 * inch, 10.5 * inch, character.player_name)
 		#Character Race, alignment, and experience
 		canvas.drawString(2 * inch, 10 * inch, character.char_race)
-		canvas.drawString(4.5 * inch, 10 * inch, character.char_alignment)
-		canvas.drawString(6 * inch, 10 * inch, str(character.char_exp))
+		canvas.drawString(4.8 * inch, 10 * inch, character.char_alignment)
+		canvas.drawString(6.5 * inch, 10 * inch, str(character.char_exp))
 
-		canvas.setFont("Times-Roman", 10)
+		#subtitles
+		#character name
+		canvas.setFont("Times-Roman", 8)
 		canvas.drawString(0.5 * inch, 10.3 * inch, "Character Name")
 		#Character level, class, background, and player name
 		canvas.drawString(2 * inch, 10.3 * inch, "Level and Class")
-		canvas.drawString(4.5 * inch, 10.3 * inch, "Background")
-		canvas.drawString(6 * inch, 10.3 * inch, "Player Name")
+		canvas.drawString(4.8 * inch, 10.3 * inch, "Background")
+		canvas.drawString(6.5 * inch, 10.3 * inch, "Player Name")
 		#Character Race, alignment, and experience
 		canvas.drawString(2 * inch, 9.8 * inch, "Race")
-		canvas.drawString(4.5 * inch, 9.8 * inch, "Alignment")
-		canvas.drawString(6 * inch, 9.8 * inch, "Experience")
+		canvas.drawString(4.8 * inch, 9.8 * inch, "Alignment")
+		canvas.drawString(6.5 * inch, 9.8 * inch, "Experience")
 
 		#Attribute Names
 		canvas.setFont("Times-Roman", 12)
@@ -195,7 +222,7 @@ async def on_message(message):
 		sendCharacterText = "pdf", "PDF", "Sheet", "sheet"
 		for word in sendCharacterText:
 			if message.content.startswith("&" + word):
-				await SendSheet(message, pChar)
+				await SendSheet(message, character)
 
 
 @client.event
