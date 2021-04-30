@@ -57,7 +57,7 @@ class Character():
 	char_level: int
 
 	#Character Action Stats
-	char_stats = stats(8, 10, 12, 13, 14, 15)
+	char_stats = stats(10, 10, 10, 10, 10, 10)
 	char_saving = saving_throw(0, 0, 0, 0, 0, 0) # Used for saving throws for character
 	char_skills = skills(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 	char_passive_perception: int
@@ -79,31 +79,24 @@ client = discord.Client()
 random.seed(time.time())
 
 
-pChar = Character()
-
-pChar.char_name = "Prefix Title, First Last, Postfix"
-pChar.char_class = "Class Name"
-pChar.char_subclass = "Subclass Name"
-pChar.char_background = "Background"
-pChar.player_name = "Discord Name"
-pChar.char_race = "Sub Race, Race"
-pChar.char_alignment = "Alignment"
-pChar.char_exp = 0
-pChar.char_level = 0
-
-pChar.char_stats = {8, 10, 12, 13, 14, 15}
-pChar.char_saving = {0, 0, 0, 0, 0, 0} # Used for saving throws for character
-pChar.char_skills = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-pChar.char_passive_perception = 12
-pChar.char_inspiration = False
-pChar.char_proficiency_bonus = 2
-pChar.char_hp = 6
-pChar.char_tmp_hp = 0
-pChar.char_armor_class = 10
-pChar.char_initiative = 0
-pChar.char_speed = 30
-pChar.char_hit_dice = 1
-pChar.char_death_saves = {0,0}
+pChar = Character("First Last",
+	"Class Name",
+	"Subclass Name",
+	"Background",
+	"Discord Name",
+	"Sub Race, Race",
+	"Alignment",
+	0,
+	0,
+	12,
+	False,
+	2,
+	6,
+	0,
+	10,
+	0,
+	30,
+	1)
 
 
 
