@@ -28,7 +28,6 @@ import time
 
 
 #instantiation
-pdf_writer = PdfFileWriter()
 client = discord.Client()
 
 #initializations
@@ -52,15 +51,28 @@ async def Roll(message):
 async def SendPDF(message):
 		await message.add_reaction('📝')
 
+		attributeStrings = ("Strength", "Str"), ("Dexterity", "Dex"), ("Constitution", "Con"), ("Intelligence", "Int"), ("Wisdom", "Wis"), ("Charisma", "Cha")
+		attributes = strength, dexterity, constitution, intelligence, wisdom, charisma = 8, 10, 10, 12, 14, 15
+
 		#create pdf
 		canvas = Canvas("character.pdf", pagesize=LETTER)
-		canvas.setFont("Times-Roman", 18)
-		canvas.drawString(72, 72, "Hello, World")
+		canvas.setFont("Times-Roman", 12)
+		for count in range(0, 6):
+			canvas.drawString(0.5 * inch, (10.75 * inch) - (count * inch), (attributeStrings[count][0]))
+		canvas.setFont("Times-Roman", 30)
+		for count in range(0, 6):
+			canvas.drawString(0.5 * inch, (10.25 * inch) - (count * inch), (str(attributes[count])))
+		canvas.setFont("Times-Roman", 20)
+		for count in range(0, 6):
+			canvas.drawString(0.75 * inch, (10 * inch) - (count * inch), (str((attributes[count] - 10)//2)))
 		#save pdf
 		canvas.save()
 
 		#send file to discord
 		await message.channel.send(file=discord.File('character.pdf'))
+
+		#delete saved file
+		#os.remove('character.pdf')
 
 
 
