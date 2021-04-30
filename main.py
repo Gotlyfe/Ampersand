@@ -26,12 +26,84 @@ import math
 #time
 import time
 
+import dataclasses
+from dataclasses import dataclass
+from collections import namedtuple
+
+@dataclass
+class Character():
+	#Character stats at base values
+	stats = namedtuple("Stats", ["strength", "dexterity", "consitution", "intelligence", "wisdom", "charisma"])
+
+	#Saving throws base values
+	saving_throw = namedtuple("Saving_Throw", ["strength", "dexterity", "consitution", "intelligence", "wisdom", "charisma"])
+
+	#Skills unmodified
+	skills = namedtuple("Skills", ["acrobatics", "animal_handling", "arcana", "athletics", "deception", "history", "insight",
+	"intimidation", "investigation", "medicine", "nature", "perception", "performance", "persuasion", "religion", "sleight_of_hand", "stealth", "survival"])
+
+	# death_saves will be passed a tuple of (bool, bool, bool)
+	death_saves = namedtuple("Death_Saves", ["successes", "failures"])
+
+	#Character General Info
+	char_name: str
+	char_class: str
+	char_subclass: str
+	char_background: str
+	player_name: str #This will be thier discord tag
+	char_race: str
+	char_alignment: str
+	char_exp: int
+	char_level: int
+
+	#Character Action Stats
+	char_stats = stats(8, 10, 12, 13, 14, 15)
+	char_saving = saving_throw(0, 0, 0, 0, 0, 0) # Used for saving throws for character
+	char_skills = skills(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+	char_passive_perception: int
+	char_inspiration: bool
+	char_proficiency_bonus: int
+	char_hp:int
+	char_tmp_hp:int
+	char_armor_class: int
+	char_initiative: int
+	char_speed: int
+	char_hit_dice: int
+	char_death_saves = death_saves(0, 0)
+
 
 #instantiation
 client = discord.Client()
 
 #initializations
 random.seed(time.time())
+
+
+pChar = Character()
+
+pChar.char_name = "Prefix Title, First Last, Postfix"
+pChar.char_class = "Class Name"
+pChar.char_subclass = "Subclass Name"
+pChar.char_background = "Background"
+pChar.player_name = "Discord Name"
+pChar.char_race = "Sub Race, Race"
+pChar.char_alignment = "Alignment"
+pChar.char_exp = 0
+pChar.char_level = 0
+
+pChar.char_stats = {8, 10, 12, 13, 14, 15}
+pChar.char_saving = {0, 0, 0, 0, 0, 0} # Used for saving throws for character
+pChar.char_skills = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+pChar.char_passive_perception = 12
+pChar.char_inspiration = False
+pChar.char_proficiency_bonus = 2
+pChar.char_hp = 6
+pChar.char_tmp_hp = 0
+pChar.char_armor_class = 10
+pChar.char_initiative = 0
+pChar.char_speed = 30
+pChar.char_hit_dice = 1
+pChar.char_death_saves = {0,0}
 
 
 
@@ -48,11 +120,8 @@ async def Roll(message):
 
 
 #PDF sending Function "pdf", "PDF"
-async def SendPDF(message):
+async def SendSheet(message, character):
 		await message.add_reaction('📝')
-
-		attributeStrings = ("Strength", "Str"), ("Dexterity", "Dex"), ("Constitution", "Con"), ("Intelligence", "Int"), ("Wisdom", "Wis"), ("Charisma", "Cha")
-		attributes = strength, dexterity, constitution, intelligence, wisdom, charisma = 8, 10, 10, 12, 14, 15
 
 		#create pdf
 		canvas = Canvas("character.pdf", pagesize=LETTER)
@@ -77,16 +146,6 @@ async def SendPDF(message):
 
 
 
-
-def npcSheet():
-	#character's names
-	name = []
-	attributeStrings = ("Strength", "Str"), ("Dexterity", "Dex"), ("Constitution", "Con")
-	attributes = strength, dexterity, constitution
-	classStrings = "Cleric", "Fighter", "Rogue", "Wizard"
-
-
-
 @client.event
 async def on_ready():
 	print("We have logged in as " + str(client.user))
@@ -99,12 +158,12 @@ async def on_message(message):
 	if message.content.startswith("&"):
 		# message started with '&'
 
-		helpText = "help", "Help", "tasukete", "Tasukete", "?"
+		helpText = "h", "H", "help", "Help", "tasukete", "Tasukete", "?"
 		for word in helpText:
 			if message.content.startswith("&" + word):
 				await Help(message)
 
-		diceText = "roll", "Roll"
+		diceText = "r", "R", "roll", "Roll"
 		for word in diceText:
 			if message.content.startswith("&" + word):
 				await Roll(message)
