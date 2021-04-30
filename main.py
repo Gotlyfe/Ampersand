@@ -22,6 +22,9 @@ from reportlab.pdfgen.canvas import Canvas
 #environment
 import os
 
+#input output
+import io
+
 #random
 import random
 
@@ -91,11 +94,6 @@ pdf_writer = PdfFileWriter()
 #random seed
 random.seed(time.time())
 
-#getting pdf from path
-input_pdf = PdfFileReader("Character_Sheet_2018.pdf")
-
-#ability scores strings
-stat_strings = "Strength", "Dexterity", "Consitution", "Intelligence", "Wisdom", "Charisma"
 
 #character basic info
 character = Character("First Last",
@@ -120,79 +118,95 @@ character = Character("First Last",
 
 
 def download_file(download_url):
-    response = urllib.request.urlopen(download_url)
-    file = open("Document.pdf", 'wb')
-    file.write(response.read())
-    file.close()
-    #print("Completed")
+	response = urllib.request.urlopen(download_url)
+	file = open("Document.pdf", 'wb')
+	file.write(response.read())
+	file.close()
+	#print("Completed")
 
 
 #Help Function "help", "Help", "tasukete", "Tasukete", "?"
 async def Help(message):
-		await message.add_reaction('😄')
-		await message.channel.send("no.")
+	await message.add_reaction('😄')
+	await message.channel.send("no.")
 
 
 #Roll Function "roll", "Roll"
 async def Roll(message):
-		await message.add_reaction('🎲')
-		await message.channel.send(random.randint(1, 6))
+	await message.add_reaction('🎲')
+	await message.channel.send(random.randint(1, 6))
 
 
 #PDF sending Function "pdf", "PDF"
 async def SendSheet(message, character):
-		await message.add_reaction('📝')
+	#reaction to message 
+	await message.add_reaction('📝')
 
-		#create pdf
-		canvas = Canvas("character.pdf", pagesize=LETTER)
+	packet = io.BytesIO()
+	# create a new PDF with Reportlab
+	canvas = Canvas(packet, pagesize=LETTER)
 
-		#Character Name
-		canvas.setFont("Times-Roman", 16)
-		canvas.drawString(0.2 * inch, 10.5 * inch, character.char_name)
-		#Character level, class, background, and player name
-		canvas.drawString(2 * inch, 10.5 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
-		canvas.drawString(4.8 * inch, 10.5 * inch, character.char_background)
-		canvas.drawString(6.5 * inch, 10.5 * inch, character.player_name)
-		#Character Race, alignment, and experience
-		canvas.drawString(2 * inch, 10 * inch, character.char_race)
-		canvas.drawString(4.8 * inch, 10 * inch, character.char_alignment)
-		canvas.drawString(6.5 * inch, 10 * inch, str(character.char_exp))
-
-		#subtitles
-		#character name
-		canvas.setFont("Times-Roman", 8)
-		canvas.drawString(0.5 * inch, 10.3 * inch, "Character Name")
-		#Character level, class, background, and player name
-		canvas.drawString(2 * inch, 10.3 * inch, "Level and Class")
-		canvas.drawString(4.8 * inch, 10.3 * inch, "Background")
-		canvas.drawString(6.5 * inch, 10.3 * inch, "Player Name")
-		#Character Race, alignment, and experience
-		canvas.drawString(2 * inch, 9.8 * inch, "Race")
-		canvas.drawString(4.8 * inch, 9.8 * inch, "Alignment")
-		canvas.drawString(6.5 * inch, 9.8 * inch, "Experience")
-
-		#Attribute Names
-		canvas.setFont("Times-Roman", 12)
-		for count in range(0, 6):
-			canvas.drawString(0.3 * inch, (9.75 * inch) - (count * inch), str(stat_strings[count]))
-		#Attribute Values
-		canvas.setFont("Times-Roman", 30)
-		for count in range(0, 6):
-			canvas.drawString(0.5 * inch, (9.25 * inch) - (count * inch), str(character.char_stats[count]))
-		#Attribute modifier
-		canvas.setFont("Times-Roman", 18)
-		for count in range(0, 6):
-			canvas.drawString(0.6 * inch, (9 * inch) - (count * inch), (str((character.char_stats[count] - 10)//2)))
+	#Character Name
+	canvas.setFont("Times-Roman", 16)
+	canvas.drawString(0.7 * inch, 10 * inch, character.char_name)
+	
+	#Character level, class, background, and player name
+	canvas.setFont("Times-Roman", 14)
+	canvas.drawString(3.6 * inch, 10.1 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
+	canvas.drawString(5.2 * inch, 10.1 * inch, character.char_background)
+	canvas.drawString(6.5 * inch, 10.1 * inch, character.player_name)
+	#Character Race, alignment, and experience
+	canvas.drawString(3.6 * inch, 9.7 * inch, character.char_race)
+	canvas.drawString(5.2 * inch, 9.7 * inch, character.char_alignment)
+	canvas.drawString(6.5 * inch, 9.7 * inch, str(character.char_exp))
 
 
-		#save pdf
-		canvas.save()
+	#proficiency bonus
+	canvas.setFont("Times-Roman", 24)
+	canvas.drawString(1.2 * inch, (8.4 * inch), str(character.char_proficiency_bonus))
 
-		#send file to discord
-		await message.channel.send(file=discord.File('character.pdf'))
+	#Armor Class
+	canvas.drawString(3.1 * inch, (8.7 * inch), str(character.char_armor_class))
 
-		#delete saved file
-		#os.remove('character.pdf')
+	#initiative
+	canvas.drawString(3.9 * inch, (8.7 * inch), str(character.char_initiative))
+
+	#speed
+	canvas.drawString(4.7 * inch, (8.7 * inch), str(character.char_speed))
+
+	#Attribute Values
+	canvas.setFont("Times-Roman", 30)
+	for count in range(0, 6):
+		canvas.drawString(0.48 * inch, (8.25 * inch) - (count * inch), str(character.char_stats[count]))
+	#Attribute modifier
+	canvas.setFont("Times-Roman", 18)
+	for count in range(0, 6):
+		canvas.drawString(0.65 * inch, (8.2 * inch) - (count * inch), (str((character.char_stats[count] - 10)//2)))
+
+
+	#save pdf
+	canvas.save()
+
+	#move to the beginning of the StringIO buffer
+	packet.seek(0)
+	new_pdf = PdfFileReader(packet)
+	# read your existing PDF
+	existing_pdf = PdfFileReader(open("Character_Sheet_2018.pdf", "rb"))
+	output = PdfFileWriter()
+	# add the "watermark" (which is the new pdf) on the existing page
+	page = existing_pdf.getPage(0)
+	page.mergePage(new_pdf.getPage(0))
+	output.addPage(page)
+	# finally, write "output" to a real file
+	outputStream = open("character.pdf", "wb")
+	output.write(outputStream)
+	outputStream.close()
+
+	#send file to discord
+	await message.channel.send(file=discord.File('character.pdf'))
+
+	#delete saved file
+	#os.remove('character.pdf')
 
 
 
@@ -230,6 +244,5 @@ async def on_reaction_add(reaction, user):
 	if reaction.emoji == '😄':
 		#do Stuff
 		pass
-
 
 client.run(os.getenv("TOKEN"))
