@@ -68,9 +68,11 @@ class Character():
 	char_level: int
 
 	#Character Action Stats
-	char_stats = stats(10, 10, 10, 10, 10, 10)
-	char_saving = saving_throw(0, 0, 0, 0, 0, 0) # Used for saving throws for character
-	char_skills = skills(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+	char_stats = stats(int, int, int, int, int, int)
+	char_saving = saving_throw(int, int, int, int, int, int) # Used for saving throws for character
+	char_saving_proficiency = saving_throw(int, int, int, int, int, int)
+	char_skills = skills(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
+	char_skills_proficiency = skills(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
 	char_passive_perception: int
 	char_inspiration: bool
 	char_proficiency_bonus: int
@@ -80,7 +82,7 @@ class Character():
 	char_initiative: int
 	char_speed: int
 	char_hit_dice: int
-	char_death_saves = death_saves(0, 0)
+	char_death_saves = death_saves(int, int)
 
 
 
@@ -113,9 +115,14 @@ character = Character("First Last",
 	10,
 	0,
 	30,
-	1)
+	1,)
 
-
+character.char_stats = (10, 11, 12, 13, 14, 15)
+character.char_saving =	(10, 11, 12, 13, 14, 15)	
+character.char_saving_proficiency =	(1, 1, 0, 9, 0, 0)	
+character.char_skills = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
+character.char_skills_proficiency =	(0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1)
+character.char_death_saves =(0, 0)
 
 def download_file(download_url):
 	response = urllib.request.urlopen(download_url)
@@ -123,6 +130,88 @@ def download_file(download_url):
 	file.write(response.read())
 	file.close()
 	#print("Completed")
+
+#creates a sheet for the character.pdf
+def create_sheet(character):
+	
+	packet = io.BytesIO()
+	# create a new PDF with Reportlab
+	canvas = Canvas(packet, pagesize=LETTER)
+
+	#Character Name
+	canvas.setFont("Times-Roman", 16)
+	canvas.drawString(0.7 * inch, 9.85 * inch, character.char_name)
+	
+	#Character level, class, background, and player name
+	canvas.setFont("Times-Roman", 14)
+	canvas.drawString(3.7 * inch, 10.15 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
+	canvas.drawString(5.2 * inch, 10.15 * inch, character.char_background)
+	canvas.drawString(6.5 * inch, 10.15 * inch, character.player_name)
+	#Character Race, alignment, and experience
+	canvas.drawString(3.7 * inch, 9.75 * inch, character.char_race)
+	canvas.drawString(5.2 * inch, 9.75 * inch, character.char_alignment)
+	canvas.drawString(6.5 * inch, 9.75 * inch, str(character.char_exp))
+
+
+	#proficiency bonus
+	canvas.setFont("Times-Roman", 24)
+	canvas.drawString(1.35 * inch, (8.4 * inch), str(character.char_proficiency_bonus))
+
+	#Armor Class
+	canvas.drawString(3.2 * inch, (8.7 * inch), str(character.char_armor_class))
+
+	#initiative
+	canvas.drawString(4.0 * inch, (8.7 * inch), str(character.char_initiative))
+
+	#speed
+	canvas.drawString(4.75 * inch, (8.7 * inch), str(character.char_speed))
+
+	#Attribute Values
+	canvas.setFont("Times-Roman", 30)
+	for count in range(0, 6):
+		canvas.drawString(0.48 * inch, (8.55 * inch) - (count * inch), str(character.char_stats[count]))
+	#Attribute modifier
+	canvas.setFont("Times-Roman", 18)
+	for count in range(0, 6):
+		canvas.drawString(0.65 * inch, (8.22 * inch) - (count * inch), (str((character.char_stats[count] - 10)//2)))
+
+	#Saving throws
+	canvas.setFont("Times-Roman", 12)
+	for count in range(0, 6):
+		canvas.drawString(1.5 * inch, (8.0 * inch) - (count * inch * 0.188), (str((character.char_saving[count] - 10)//2)))
+	#Saving throws proficiency
+	canvas.setFont("Times-Roman", 6)
+	for count in range(0, 6):
+		canvas.drawString(1.33 * inch, (8.0 * inch) - (count * inch * 0.188), (str((character.char_saving_proficiency[count] - 10)//2)))
+
+	#skills
+	canvas.setFont("Times-Roman", 12)
+	for count in range(0, 18):
+		canvas.drawString(1.5 * inch, (6.4 * inch) - (count * inch * 0.188), (str((character.char_skills[count] - 10)//2)))
+	#skills prof
+	canvas.setFont("Times-Roman", 6)
+	for count in range(0, 18):
+		canvas.drawString(1.3 * inch, (6.4 * inch) - (count * inch * 0.188), (str((character.char_skills_proficiency[count] - 10)//2)))
+
+
+
+	#save pdf
+	canvas.save()
+
+	#move to the beginning of the StringIO buffer
+	packet.seek(0)
+	new_pdf = PdfFileReader(packet)
+	# read your existing PDF
+	existing_pdf = PdfFileReader(open("Character_Sheet_2018.pdf", "rb"))
+	output = PdfFileWriter()
+	# add the "watermark" (which is the new pdf) on the existing page
+	page = existing_pdf.getPage(0)	#only one page
+	page.mergePage(new_pdf.getPage(0))
+	output.addPage(page)
+	# finally, write "output" to a real file
+	outputStream = open("character.pdf", "wb")
+	output.write(outputStream)
+	outputStream.close()
 
 
 #Help Function "help", "Help", "tasukete", "Tasukete", "?"
@@ -137,70 +226,12 @@ async def Roll(message):
 	await message.channel.send(random.randint(1, 6))
 
 
-#PDF sending Function "pdf", "PDF"
+#PDF charactersheet sending Function "pdf", "PDF"
 async def SendSheet(message, character):
 	#reaction to message 
 	await message.add_reaction('📝')
 
-	packet = io.BytesIO()
-	# create a new PDF with Reportlab
-	canvas = Canvas(packet, pagesize=LETTER)
-
-	#Character Name
-	canvas.setFont("Times-Roman", 16)
-	canvas.drawString(0.7 * inch, 10 * inch, character.char_name)
-	
-	#Character level, class, background, and player name
-	canvas.setFont("Times-Roman", 14)
-	canvas.drawString(3.6 * inch, 10.1 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
-	canvas.drawString(5.2 * inch, 10.1 * inch, character.char_background)
-	canvas.drawString(6.5 * inch, 10.1 * inch, character.player_name)
-	#Character Race, alignment, and experience
-	canvas.drawString(3.6 * inch, 9.7 * inch, character.char_race)
-	canvas.drawString(5.2 * inch, 9.7 * inch, character.char_alignment)
-	canvas.drawString(6.5 * inch, 9.7 * inch, str(character.char_exp))
-
-
-	#proficiency bonus
-	canvas.setFont("Times-Roman", 24)
-	canvas.drawString(1.2 * inch, (8.4 * inch), str(character.char_proficiency_bonus))
-
-	#Armor Class
-	canvas.drawString(3.1 * inch, (8.7 * inch), str(character.char_armor_class))
-
-	#initiative
-	canvas.drawString(3.9 * inch, (8.7 * inch), str(character.char_initiative))
-
-	#speed
-	canvas.drawString(4.7 * inch, (8.7 * inch), str(character.char_speed))
-
-	#Attribute Values
-	canvas.setFont("Times-Roman", 30)
-	for count in range(0, 6):
-		canvas.drawString(0.48 * inch, (8.25 * inch) - (count * inch), str(character.char_stats[count]))
-	#Attribute modifier
-	canvas.setFont("Times-Roman", 18)
-	for count in range(0, 6):
-		canvas.drawString(0.65 * inch, (8.2 * inch) - (count * inch), (str((character.char_stats[count] - 10)//2)))
-
-
-	#save pdf
-	canvas.save()
-
-	#move to the beginning of the StringIO buffer
-	packet.seek(0)
-	new_pdf = PdfFileReader(packet)
-	# read your existing PDF
-	existing_pdf = PdfFileReader(open("Character_Sheet_2018.pdf", "rb"))
-	output = PdfFileWriter()
-	# add the "watermark" (which is the new pdf) on the existing page
-	page = existing_pdf.getPage(0)
-	page.mergePage(new_pdf.getPage(0))
-	output.addPage(page)
-	# finally, write "output" to a real file
-	outputStream = open("character.pdf", "wb")
-	output.write(outputStream)
-	outputStream.close()
+	create_sheet(character)
 
 	#send file to discord
 	await message.channel.send(file=discord.File('character.pdf'))
