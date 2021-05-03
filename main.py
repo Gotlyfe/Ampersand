@@ -213,11 +213,88 @@ def create_sheet(character):
 	output.write(outputStream)
 	outputStream.close()
 
+def create_mini_sheet(character):
+	# create a new PDF with Reportlab
+	packet = io.BytesIO()
+	canvas = Canvas("mini_character.pdf", pagesize=LETTER)
+
+	attribute_strings = ("strength", "dexterity", "consitution", "intelligence", "wisdom", "charisma")
+	skill_strings = ("acrobatics", "animal_handling", "arcana", "athletics", "deception", "history", "insight",
+	"intimidation", "investigation", "medicine", "nature", "perception", "performance", "persuasion", "religion", "sleight_of_hand", "stealth", "survival")
+
+
+	#Character Name
+	canvas.setFont("Times-Roman", 24)
+	canvas.drawString(0.5 * inch, 10.2 * inch, character.char_name)
+	
+	#Character level, class, background, and player name
+	canvas.setFont("Times-Roman", 20)
+	canvas.drawString(4 * inch, 10.15 * inch, str(character.char_level) + " " + character.char_subclass + ", " + character.char_class) 
+	canvas.drawString(5.2 * inch, 10.15 * inch, character.char_background)
+	canvas.drawString(6.5 * inch, 10.15 * inch, character.player_name)
+	#Character Race, alignment, and experience
+	canvas.drawString(4 * inch, 9.75 * inch, character.char_race)
+	canvas.drawString(5.2 * inch, 9.75 * inch, character.char_alignment)
+	canvas.drawString(6.5 * inch, 9.75 * inch, str(character.char_exp))
+
+
+	#proficiency bonus
+	canvas.setFont("Times-Roman", 24)
+	canvas.drawString(1.35 * inch, (8.4 * inch), str(character.char_proficiency_bonus))
+	canvas.drawString(1.35 * inch, (8.2 * inch), str("Proficiency:"))
+
+	#Armor Class
+	canvas.drawString(3.2 * inch, (8.7 * inch), str(character.char_armor_class))
+
+	#initiative
+	canvas.drawString(4.0 * inch, (8.7 * inch), str(character.char_initiative))
+
+	#speed
+	canvas.drawString(4.75 * inch, (8.7 * inch), str(character.char_speed))
+
+	#Attribute Values
+	canvas.setFont("Times-Roman", 40)
+	for count in range(0, 6):
+		canvas.drawString(0.6 * inch, (8.55 * inch) - (count * inch * 1.5), str(character.char_stats[count]))
+	#Attribute modifier
+	canvas.setFont("Times-Roman", 32)
+	for count in range(0, 6):
+		canvas.drawString(0.65 * inch, (8.22 * inch) - (count * inch * 1.5), (str((character.char_stats[count] - 10)//2)))
+
+	#Attribute modifier
+	canvas.setFont("Times-Roman", 18)
+	for count in range(0, 6):
+		canvas.drawString(0.5 * inch, (8.22 * inch) - (count * inch * 1.5), attribute_strings[count])
+
+	#Saving throws
+	canvas.setFont("Times-Roman", 12)
+	for count in range(0, 6):
+		canvas.drawString(1.5 * inch, (8.0 * inch) - (count * inch * 0.188), (str((character.char_saving[count] - 10)//2)))
+	#Saving throws proficiency
+	canvas.setFont("Times-Roman", 6)
+	for count in range(0, 6):
+		canvas.drawString(1.33 * inch, (8.0 * inch) - (count * inch * 0.188), (str((character.char_saving_proficiency[count] - 10)//2)))
+
+	#skills
+	canvas.setFont("Times-Roman", 12)
+	for count in range(0, 18):
+		canvas.drawString(1.5 * inch, (6.4 * inch) - (count * inch * 0.188), (str((character.char_skills[count] - 10)//2)))
+	#skills prof
+	canvas.setFont("Times-Roman", 6)
+	for count in range(0, 18):
+		canvas.drawString(1.3 * inch, (6.4 * inch) - (count * inch * 0.188), (str((character.char_skills_proficiency[count] - 10)//2)))
+
+
+	#save pdf
+	canvas.save()
 
 #Help Function "help", "Help", "tasukete", "Tasukete", "?"
 async def Help(message):
-	await message.add_reaction('😄')
-	await message.channel.send("no.")
+	await message.add_reaction('🙌')
+	helpChannel = await message.guild.create_text_channel('help' + str(random.randint(1, 8)))
+	await message.channel.send("not here.")
+	await helpChannel.send("...okay")
+	await helpChannel.send("Whats up {}?".format(message.author.mention))
 
 
 #Roll Function "roll", "Roll"
@@ -240,8 +317,6 @@ async def SendSheet(message, character):
 	#os.remove('character.pdf')
 
 
-
-
 @client.event
 async def on_ready():
 	print("We have logged in as " + str(client.user))
@@ -254,12 +329,12 @@ async def on_message(message):
 	if message.content.startswith("&"):
 		# message started with '&'
 
-		helpText = "h", "H", "help", "Help", "tasukete", "Tasukete", "?"
+		helpText = "help", "Help", "tasukete", "Tasukete", "?"
 		for word in helpText:
 			if message.content.startswith("&" + word):
 				await Help(message)
 
-		diceText = "r", "R", "roll", "Roll"
+		diceText = "roll", "Roll"
 		for word in diceText:
 			if message.content.startswith("&" + word):
 				await Roll(message)
@@ -276,4 +351,5 @@ async def on_reaction_add(reaction, user):
 		#do Stuff
 		pass
 
+create_mini_sheet(character)
 client.run(os.getenv("TOKEN"))
