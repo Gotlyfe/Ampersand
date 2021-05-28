@@ -45,51 +45,64 @@ async def on_reaction_add(reaction, user):
 	if(user != client):
 		if reaction.emoji == '😄':
 			#do Stuff
-			helpChannel = await reaction.message.guild.create_text_channel('Random Channel' + str(random.randint(1, 47)))
+			await reaction.message.add_reaction('😄')
+			
 		if reaction.emoji == '😭':
 			#do Stuff
-			await reaction.message.add_reaction('🎲')
+			await reaction.message.add_reaction('😭')
 		if reaction.emoji == '🎲':
 			#do Stuff
-			new_context = reaction.message
-			new_context.author = user
-			await roll(new_context, new_context[1:-1])
+			pass
 
 #Ping Function
 @client.command()
 async def ping(context):
-	await context.channel.send("Pong! {:.6g}".format(client.latency * 1000) + "ms")
+	await context.channel.send("Pong! {:.2g}".format(client.latency * 1000) + "ms")
 
 	await context.message.add_reaction('🏓')
 
-"""Roll Function
-@client.command()
-async def roll(context, arguments):
-	#parse the string to set variables
-	dice_type:str = ""
-	number_to_roll = 1
-	add = None
-	subtract = None
-	await context.channel.send(random.randint(1, 6))
-	await context.add_reaction('🎲')
-"""
+
 #mirror test command
 @client.command()
 async def test(ctx, arg):
-    await ctx.send(arg)
 
+  await ctx.send(arg)
 
+#character
+@client.command()
+async def character(ctx, arg):
+	arg = arg.lower()
+	listOfCommands = [["create", "new", "add"],
+	 ["delete", "remove"],
+	  ["change", "swap", "switch"],
+		 ["list", "all", "total"]]
+
+	if arg in listOfCommands[0]:#"create", "new", "add"
+		await ctx.send(listOfCommands[0])
+	elif arg in listOfCommands[1]:#"delete", "remove"
+		pass
+	elif arg in listOfCommands[2]:#"change", "swap", "switch"
+		pass
+	elif arg in listOfCommands[3]:#"list", "all", "total"
+		pass
+	else:
+		#print possible commands
+		await ctx.send(listOfCommands)
+
+#roll command
 @client.command()
 async def roll(ctx, *args):
 	"""
 	as &roll 2 d6
 	"""
-	print(ctx)
 	await ctx.message.add_reaction('🎲')
+
 	REQUIRED_NUMBER = 2
-	if (len(args) != REQUIRED_NUMBER):
+	
+	if (len(args) != REQUIRED_NUMBER): #arguments not equal to required number
 		await ctx.send("Invalid number of Arguments")
 		return False
+
 	try:
 		total_rolls = int(args[0])
 	except ValueError:
@@ -106,7 +119,7 @@ async def roll(ctx, *args):
 	try:
 		rolls = eval(command_str+args_str)
 	except NameError:
-		await ctx.send("Something went wrong")
+		await ctx.send("Something went wrong with evaluation")
 		return False
 
 	await ctx.send(rolls)
